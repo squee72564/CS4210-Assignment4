@@ -1,9 +1,9 @@
 #-------------------------------------------------------------------------
-# AUTHOR: your name
-# FILENAME: title of the source file
+# AUTHOR: Alexander Rodriguez 
+# FILENAME: bagging_random_forest.py 
 # SPECIFICATION: description of the program
 # FOR: CS 4210- Assignment #4
-# TIME SPENT: how long it took you to complete the assignment
+# TIME SPENT: 20-25 min 
 #-----------------------------------------------------------*/
 
 #IMPORTANT NOTE: DO NOT USE ANY ADVANCED PYTHON LIBRARY TO COMPLETE THIS CODE SUCH AS numpy OR pandas. You have to work here only with standard vectors and arrays
@@ -12,6 +12,7 @@
 from sklearn import tree
 from sklearn.utils import resample
 from sklearn.ensemble import RandomForestClassifier
+import numpy as np
 
 dbTraining = []
 dbTest = []
@@ -20,51 +21,66 @@ y_training = []
 classVotes = [] #this array will be used to count the votes of each classifier
 
 #reading the training data from a csv file and populate dbTraining
-#--> add your Python code here
+with open('optdigits.tra', 'r') as f:
+    for line in f.readlines():
+        line = line.strip().split(',')
+        line = [int(x) for x in line]
+        dbTraining.append(line)
 
 #reading the test data from a csv file and populate dbTest
-#--> add your Python code here
+with open('optdigits.tes', 'r') as f:
+    for line in f.readlines():
+        line = line.strip().split(',')
+        line = [int(x) for x in line]
+        dbTest.append(line)
 
-#inititalizing the class votes for each test sample. Example: classVotes.append([0,0,0,0,0,0,0,0,0,0])
-#--> add your Python code here
+#inititalizing the class votes for each test sample.
+for i in range(len(dbTest)):
+    classVotes.append([0]*10)
 
 print("Started my base and ensemble classifier ...")
 
+accuracy = 0
 for k in range(20): #we will create 20 bootstrap samples here (k = 20). One classifier will be created for each bootstrap sample
 
-  bootstrapSample = resample(dbTraining, n_samples=len(dbTraining), replace=True)
+    bootstrapSample = resample(dbTraining, n_samples=len(dbTraining), replace=True)
 
-  #populate the values of X_training and y_training by using the bootstrapSample
-  #--> add your Python code here
+    #populate the values of X_training and y_training by using the bootstrapSample
+    X_training = [sample[:-1] for sample in bootstrapSample]
+    y_training = [sample[-1] for sample in bootstrapSample]
 
-  #fitting the decision tree to the data
-  clf = tree.DecisionTreeClassifier(criterion = 'entropy', max_depth=None) #we will use a single decision tree without pruning it
-  clf = clf.fit(X_training, y_training)
+    #fitting the decision tree to the data
+    clf = tree.DecisionTreeClassifier(criterion = 'entropy', max_depth=None) #we will use a single decision tree without pruning it
+    clf = clf.fit(X_training, y_training)
 
-  for i, testSample in enumerate(dbTest):
+    for i, testSample in enumerate(dbTest):
 
-      #make the classifier prediction for each test sample and update the corresponding index value in classVotes. For instance,
-      # if your first base classifier predicted 2 for the first test sample, then classVotes[0,0,0,0,0,0,0,0,0,0] will change to classVotes[0,0,1,0,0,0,0,0,0,0].
-      # Later, if your second base classifier predicted 3 for the first test sample, then classVotes[0,0,1,0,0,0,0,0,0,0] will change to classVotes[0,0,1,1,0,0,0,0,0,0]
-      # Later, if your third base classifier predicted 3 for the first test sample, then classVotes[0,0,1,1,0,0,0,0,0,0] will change to classVotes[0,0,1,2,0,0,0,0,0,0]
-      # this array will consolidate the votes of all classifier for all test samples
-      #--> add your Python code here
+        #make the classifier prediction for each test sample and update the corresponding index value in classVotes.
+        class_predicted = clf.predict([testSample[:-1]])
+        classVotes[i][class_predicted[0]] += 1
 
-      if k == 0: #for only the first base classifier, compare the prediction with the true label of the test sample here to start calculating its accuracy
-         #--> add your Python code here
+        if k == 0: #for only the first base classifier, compare the prediction with the true label of the test sample here to start calculating its accuracy
+            if class_predicted[0] == testSample[-1]:
+                accuracy += 1
 
-  if k == 0: #for only the first base classifier, print its accuracy here
-     #--> add your Python code here
-     print("Finished my base classifier (fast but relatively low accuracy) ...")
-     print("My base classifier accuracy: " + str(accuracy))
-     print("")
+    if k == 0: #for only the first base classifier, print its accuracy here
+        accuracy = accuracy/len(dbTest)*100
+        print("Finished my base classifier (fast but relatively low accuracy) ...")
+        print("My base classifier accuracy: " + str(accuracy) + "%")
+        print("")
 
-  #now, compare the final ensemble prediction (majority vote in classVotes) for each test sample with the ground truth label to calculate the accuracy of the ensemble classifier (all base classifiers together)
-  #--> add your Python code here
+#now, compare the final ensemble prediction (majority vote in classVotes) for each test sample with the ground truth label to calculate the accuracy of the ensemble classifier (all base classifiers together)
+ensemble_accuracy = 0
+for i, testSample in enumerate(dbTest):
+    ensemble_class_predicted = np.argmax(classVotes[i])
+    if ensemble_class_predicted == testSample[-1]:
+        ensemble_accuracy += 1
+
+ensemble_accuracy = ensemble_accuracy/len(dbTest)*100
 
 #printing the ensemble accuracy here
 print("Finished my ensemble classifier (slow but higher accuracy) ...")
-print("My ensemble accuracy: " + str(accuracy))
+print("My ensemble accuracy: " + str(ensemble_accuracy) + "%")
 print("")
 
 print("Started Random Forest algorithm ...")
@@ -76,12 +92,16 @@ clf=RandomForestClassifier(n_estimators=20) #this is the number of decision tree
 clf.fit(X_training,y_training)
 
 #make the Random Forest prediction for each test sample. Example: class_predicted_rf = clf.predict([[3, 1, 2, 1, ...]]
-#--> add your Python code here
+class_predicted_rf = clf.predict([row[:-1] for row in dbTest])
 
 #compare the Random Forest prediction for each test sample with the ground truth label to calculate its accuracy
-#--> add your Python code here
+accuracy_rf = 0
+for i in range(len(dbTest)):
+    if class_predicted_rf[i] == dbTest[i][-1]:
+        accuracy_rf += 1
+accuracy_rf /= len(dbTest)
 
 #printing Random Forest accuracy here
-print("Random Forest accuracy: " + str(accuracy))
+print("Random Forest accuracy: " + str(accuracy_rf))
 
 print("Finished Random Forest algorithm (much faster and higher accuracy!) ...")
