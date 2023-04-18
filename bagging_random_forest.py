@@ -3,7 +3,7 @@
 # FILENAME: bagging_random_forest.py 
 # SPECIFICATION: description of the program
 # FOR: CS 4210- Assignment #4
-# TIME SPENT: 20-25 min 
+# TIME SPENT: 45min - 1hr 
 #-----------------------------------------------------------*/
 
 #IMPORTANT NOTE: DO NOT USE ANY ADVANCED PYTHON LIBRARY TO COMPLETE THIS CODE SUCH AS numpy OR pandas. You have to work here only with standard vectors and arrays
