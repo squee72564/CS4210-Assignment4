@@ -9,8 +9,12 @@
 #importing some Python libraries
 from sklearn.linear_model import Perceptron
 from sklearn.neural_network import MLPClassifier #pip install scikit-learn==0.18.rc2 if needed
+from sklearn.exceptions import ConvergenceWarning
+import warnings
 import numpy as np
 import pandas as pd
+# I suppressed convergence warnings to make the output clearer
+warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
 n = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0]
 r = [True, False]
