@@ -70,9 +70,20 @@ for k in range(20): #we will create 20 bootstrap samples here (k = 20). One clas
         print("")
 
 #now, compare the final ensemble prediction (majority vote in classVotes) for each test sample with the ground truth label to calculate the accuracy of the ensemble classifier (all base classifiers together)
+
+# Define a function to find the index of the maximum value in an array
+def argmax(arr):
+    max_val = arr[0]
+    max_idx = 0
+    for i in range(len(arr)):
+        if arr[i] > max_val:
+            max_val = arr[i]
+            max_idx = i
+    return max_idx
+
 ensemble_accuracy = 0
 for i, testSample in enumerate(dbTest):
-    ensemble_class_predicted = np.argmax(classVotes[i])
+    ensemble_class_predicted = argmax(classVotes[i])
     if ensemble_class_predicted == testSample[-1]:
         ensemble_accuracy += 1
 
