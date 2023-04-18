@@ -12,7 +12,6 @@
 from sklearn import tree
 from sklearn.utils import resample
 from sklearn.ensemble import RandomForestClassifier
-import numpy as np
 
 dbTraining = []
 dbTest = []
